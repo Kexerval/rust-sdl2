@@ -564,6 +564,7 @@ impl From<i32> for SwapInterval {
 /// Note: If a `Window` goes out of scope but it cloned its context,
 /// then the `SDL_Window` will not be destroyed until there are no more references to the `WindowContext`.
 /// This may happen when a `TextureCreator<Window>` outlives the `Canvas<Window>`
+#[derive(Clone)]
 pub struct Window {
     context: Rc<WindowContext>,
 }
@@ -1064,6 +1065,12 @@ impl From<Window> for CanvasBuilder {
     }
 }
 
+impl From<&Window> for CanvasBuilder {
+    fn from(window: &Window) -> CanvasBuilder {
+        CanvasBuilder::new(window.clone())
+    }
+}
+
 impl Window {
     #[inline]
     pub fn raw(&self) -> *mut sys::SDL_Window { self.context.raw }
@@ -1084,7 +1091,7 @@ impl Window {
     pub fn subsystem(&self) -> &VideoSubsystem { &self.context.subsystem }
 
     /// Initializes a new `CanvasBuilder`; a convenience method that calls `CanvasBuilder::new()`.
-    pub fn into_canvas(self) -> CanvasBuilder {
+    pub fn into_canvas(&self) -> CanvasBuilder {
         self.into()
     }
 
